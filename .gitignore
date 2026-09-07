@@ -1,0 +1,5 @@
+native-trial/build/
+native-trial/**/xcuserdata/
+*.ipa
+dist/
+*.zip

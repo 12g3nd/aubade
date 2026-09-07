@@ -1,0 +1,31 @@
+name: Build iOS trial IPA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "native-trial/**"
+      - ".github/workflows/ios-trial.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Build unsigned IPA
+        shell: bash
+        run: bash native-trial/build-mac.sh
+      - name: Locate IPA
+        id: ipa
+        shell: bash
+        run: echo "path=$(find native-trial/build -name '*.ipa' -type f -print -quit)" >> "$GITHUB_OUTPUT"
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: AubadeTrial-unsigned-ipa
+          path: ${{ steps.ipa.outputs.path }}
+          if-no-files-found: error
