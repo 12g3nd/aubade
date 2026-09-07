@@ -2,18 +2,43 @@ import XCTest
 @testable import AubadeCore
 
 /// Serves canned replies and records what was asked for.
+///
+/// Locked throughout because some callers fetch concurrently. An earlier version mutated
+/// a plain array, which raced whenever more than one feed was in flight and made the news
+/// tests fail intermittently.
+///
+/// Two modes. A queue, for sequential callers such as pagination, where request order is
+/// part of what is being tested. A URL-keyed map, for concurrent callers, where order is
+/// deliberately not deterministic and keying by request is the only stable way to answer.
 final class StubTransport: HTTPTransport, @unchecked Sendable {
-    var replies: [HTTPReply]
-    private(set) var requested: [URL] = []
-    private(set) var sentHeaders: [[String: String]] = []
+    private let lock = NSLock()
+    private var queue: [HTTPReply]
+    private var keyed: [String: HTTPReply]
+    private var _requested: [URL] = []
+    private var _sentHeaders: [[String: String]] = []
 
-    init(replies: [HTTPReply]) { self.replies = replies }
+    init(replies: [HTTPReply]) {
+        self.queue = replies
+        self.keyed = [:]
+    }
+
+    /// Answers by URL, so a concurrent fetch gets the reply meant for it.
+    init(byURL: [String: HTTPReply]) {
+        self.queue = []
+        self.keyed = byURL
+    }
+
+    var requested: [URL] { lock.withLock { _requested } }
+    var sentHeaders: [[String: String]] { lock.withLock { _sentHeaders } }
 
     func get(_ url: URL, headers: [String: String]) async throws -> HTTPReply {
-        requested.append(url)
-        sentHeaders.append(headers)
-        guard !replies.isEmpty else { throw SourceError.transport("no reply queued") }
-        return replies.removeFirst()
+        try lock.withLock {
+            _requested.append(url)
+            _sentHeaders.append(headers)
+            if let match = keyed[url.absoluteString] { return match }
+            guard !queue.isEmpty else { throw SourceError.transport("no reply queued") }
+            return queue.removeFirst()
+        }
     }
 }
 

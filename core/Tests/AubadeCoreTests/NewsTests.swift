@@ -127,9 +127,14 @@ final class NewsClientTests: XCTestCase {
     }
 
     func testFailingFeedIsSkippedWithoutLosingTheOthers() async {
-        let stub = StubTransport(replies: [
-            HTTPReply(status: 500, body: Data()),
-            HTTPReply(status: 200, body: Data(feedXML(source: "CBC", link: "https://cbc.ca/a").utf8))
+        // Keyed by URL rather than queued: feeds are fetched concurrently, so which
+        // request arrives first is not defined and must not decide the outcome.
+        let stub = StubTransport(byURL: [
+            "https://a.example/feed": HTTPReply(status: 500, body: Data()),
+            "https://b.example/feed": HTTPReply(
+                status: 200,
+                body: Data(feedXML(source: "CBC", link: "https://cbc.ca/a").utf8)
+            )
         ])
         let feeds = [
             FeedDefinition(url: URL(string: "https://a.example/feed")!, publisher: "A", beat: .world),
@@ -137,6 +142,26 @@ final class NewsClientTests: XCTestCase {
         ]
         let stories = await NewsClient(feeds: feeds, transport: stub).fetchStories()
         XCTAssertEqual(stories.count, 1, "one broken feed must not empty the news")
+    }
+
+    func testConcurrentFeedsEachGetTheirOwnReply() async {
+        // Guards the harness itself: an unlocked stub raced here and passed only by luck.
+        let stub = StubTransport(byURL: [
+            "https://one.example/feed": HTTPReply(
+                status: 200, body: Data(feedXML(source: "One", link: "https://one.example/a").utf8)
+            ),
+            "https://two.example/feed": HTTPReply(
+                status: 200, body: Data(feedXML(source: "Two", link: "https://two.example/b").utf8)
+            ),
+            "https://three.example/feed": HTTPReply(
+                status: 200, body: Data(feedXML(source: "Three", link: "https://three.example/c").utf8)
+            )
+        ])
+        let feeds = ["one", "two", "three"].map {
+            FeedDefinition(url: URL(string: "https://\($0).example/feed")!, publisher: $0, beat: .world)
+        }
+        let stories = await NewsClient(feeds: feeds, transport: stub).fetchStories()
+        XCTAssertEqual(Set(stories.map(\.publisher)), ["One", "Two", "Three"])
     }
 }
 
