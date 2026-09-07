@@ -25,7 +25,7 @@ private struct TrialView: View {
                 }
 
                 Section("Check local storage") {
-                    Text("Save a marker, close the app, and open it again. Then refresh the app through Sideloadly without uninstalling it. The same marker should remain.")
+                    Text("Save a marker, close the app, and open it again. Then re-sign the app through AltServer without uninstalling it. The same marker should remain.")
 
                     if savedMarker.isEmpty {
                         Button("Save a test marker") {

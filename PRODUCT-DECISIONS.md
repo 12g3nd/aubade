@@ -31,6 +31,10 @@
 
 ## Current feasibility gate
 
-User accepted remote compilation on a friend's Mac with no paid developer membership, followed by Sideloadly signing/installing and periodic refresh from the user's Windows laptop. The next authorized step is a minimal native installation trial, not the full product.
+The friend's Mac is no longer available, and Sideloadly failed to launch on Windows and was removed. The build now runs on a GitHub Actions macOS runner at no cost, and signing/installing is done by AltServer on Windows with a free Apple account. The next authorized step is a minimal native installation trial, not the full product.
+
+Verified so far: CI compiles a valid arm64 iOS binary; the Windows environment (web iTunes/iCloud, Apple Mobile Device Service, Bonjour, USB pairing) is correctly configured. Unverified: signing, installation, and launch on the device.
+
+Open decision, deferred until the trial passes: free-account signing expires every seven days, which fits a trial but not a morning app relied on daily. The candidates are on-device refresh (SideStore) or a paid Apple Developer membership. Do not build the full product on top of an install path that dies weekly.
 
 Trial must establish device compilation, installation, offline launch, local persistence through re-signing, export, and refresh practicality. Account authorization, university restrictions, Quercus access, local inference performance, and public-content sourcing remain unproven. Final product design is not complete; resume the interview around those branches after feasibility evidence.

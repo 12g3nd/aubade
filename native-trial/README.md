@@ -1,49 +1,79 @@
 # Aubade native installation trial
 
-This is a small Swift + SwiftUI iPhone app to test remote Mac compilation, Windows sideloading, offline launch, and persistence after re-signing. It is not the morning briefing product. It contains no account credentials, network code, analytics, or third-party packages. Minimum deployment target: iOS 17.
+A small Swift + SwiftUI iPhone app used to prove the build-and-install loop before any real
+product code exists. It contains no account credentials, network code, analytics, or
+third-party packages. Minimum deployment target: iOS 17.
 
-## Your friend: build on a Mac
+## Build: GitHub Actions (no Mac required)
 
-1. Extract this entire folder. Keep the project and source folders together.
-2. Install full Xcode from Apple, open it, complete first-launch setup, and install the iOS platform when prompted. Command Line Tools alone are insufficient. No paid developer membership is needed for this unsigned build.
-3. Open Terminal, type `cd `, drag the extracted `native-trial` folder into Terminal, and press Return.
-4. Run:
+The macOS build runs in CI. You do not need a Mac or a friend's laptop.
+
+1. Push a change under `native-trial/`, or open **Actions → Build iOS trial IPA → Run workflow**.
+2. Wait for the run to finish (~1 minute).
+3. Download the `AubadeTrial-unsigned-ipa` artifact, or fetch it from the command line:
 
    ```bash
-   bash build-mac.sh
+   gh run download --repo 12g3nd/aubade --name AubadeTrial-unsigned-ipa
    ```
 
-5. Finder should reveal `AubadeTrial-unsigned.ipa` in a new folder under `build`. Send that file back. It cannot be installed by tapping it on the iPhone; Windows signs it next.
+The result is an unsigned, arm64 `.ipa`. It cannot be installed by tapping it on the iPhone.
+Windows signs it in the next step.
 
-The script creates a fresh build directory each time and doesn't delete previous builds. If it fails, send the error text and `build/run.*/build.log` back. Do not send Apple account passwords, certificates, or provisioning secrets. This trial needs none from the Mac owner.
+## Install: AltServer on Windows
 
-Alternatively, open `AubadeTrial.xcodeproj` in Xcode and run it in an iPhone simulator to inspect the screen. A simulator build cannot be sideloaded onto the real phone; use the script for the device IPA.
+Sideloadly is not used. It failed to launch on this machine and was removed. AltServer can
+sideload an `.ipa` directly, without installing the AltStore app first.
 
-## You: install from Windows
+Prerequisites, all already satisfied on this laptop:
 
-1. Download Sideloadly only from [sideloadly.io](https://sideloadly.io/). Follow its current Windows instructions for the required Apple components.
-2. Connect your unlocked iPhone to your Windows laptop by USB and accept the phone's Trust prompt.
-3. Select the phone in Sideloadly and choose the returned IPA.
-4. Sign in with your own Apple account through Sideloadly. This third-party signing tool needs Apple authentication; do not send credentials to your friend or put them in this project/chat.
-5. Enable automatic refresh and install. Follow the signing/developer-trust prompts. If required, enable Settings > Privacy & Security > Developer Mode and restart as directed. Trust the developer under Settings > General > VPN & Device Management if prompted.
-6. Open **Aubade Trial**.
+- iTunes and iCloud installed from **apple.com**, not the Microsoft Store.
+- Apple Mobile Device Service and Bonjour Service running.
+- iPhone connected by USB, unlocked, and trusted.
 
-Free-account provisioning lasts seven days. Automatic refresh needs Sideloadly's helper running and a connection to your phone. Establish USB installation first; then follow Sideloadly's Wi-Fi pairing instructions if desired. If refresh is missed, the app may stop launching until re-signed. Your friend is needed for new code builds, not weekly re-signing of this same IPA.
+Steps:
 
-Keep the same signing account and bundle identifier, and do not uninstall the app during the persistence trial. Re-signing should preserve app data; uninstalling clears it. The unsigned project's identifier is `app.aubade.trial`; preserve whatever stable mapping Sideloadly uses for your account.
+1. Make sure AltServer is running (its icon lives in the Windows tray overflow, under the `^`).
+2. Hold **Shift** and click the AltServer tray icon. Holding Shift is what reveals the hidden
+   **Sideload .ipa…** entry; without it you only get "Install AltStore".
+3. Choose **Sideload .ipa…**, then pick the `.ipa`.
+4. Select your iPhone.
+5. Sign in with your own Apple account when AltServer asks. AltServer needs Apple
+   authentication to obtain a free development certificate. Enter these credentials only into
+   AltServer's own window; never put them in this repository, a chat, or a build log.
+6. On the iPhone: enable **Settings → Privacy & Security → Developer Mode** and restart if
+   prompted, then trust the certificate under **Settings → General → VPN & Device Management**.
+7. Open **Aubade Trial**.
+
+## The seven-day limit
+
+Free Apple accounts sign apps for seven days. After that the app refuses to launch until it is
+re-signed. AltServer's direct sideload does not refresh automatically, so this route means
+re-running the steps above weekly, with the phone connected to this laptop.
+
+That is acceptable for a trial and a poor fit for a daily-use morning app. If this trial passes,
+move to on-device refresh (SideStore) or a paid Apple Developer membership before building the
+real product. See the note in `../PRODUCT-DECISIONS.md`.
+
+Keep the same signing account and bundle identifier, and do not uninstall the app during the
+persistence trial. Re-signing preserves app data; uninstalling clears it, which would also clear
+any future OAuth tokens. The bundle identifier is `app.aubade.trial`.
 
 ## Trial results to report
 
-- Did the Mac script produce an IPA? If not, what was the build error?
-- Did Sideloadly install it, and does it launch on your iPhone? Record iOS and Sideloadly versions if there is a failure.
+- Did AltServer sign and install it, and does it launch? Record iOS and AltServer versions on failure.
 - Tap **Save a test marker**. Close and reopen the app. Is the same marker visible?
 - Enable airplane mode. Does the app still launch?
-- Tap **Export marker**, save the text to Files through the share sheet, and check it can be read.
-- Re-sign/refresh this same IPA without uninstalling. Is the same marker still visible?
-- Later, confirm automatic refresh succeeds before the seven-day deadline. One manual refresh alone doesn't prove unattended renewal.
+- Tap **Export marker**, save the text to Files through the share sheet, and confirm it reads back.
+- Re-sign the same IPA without uninstalling. Is the same marker still visible? This is the
+  question that matters most: it decides whether weekly re-signing would log you out of your
+  email accounts every seven days.
 
 ## Verification status
 
-Prepared on Windows. Swift compilation, iOS launch, export behavior, and signing/refresh remain unverified until this trial is run on the Mac and iPhone. The trial is intentionally dependency-free; it does not establish that Gmail, university mail, Quercus, or a local model will work yet.
+Build verified: CI produces a valid arm64 Mach-O executable with a correct `Info.plist`
+(`MinimumOSVersion` 17.0, `CFBundleSupportedPlatforms` iPhoneOS, `UIDeviceFamily` 1).
 
-References: [Sideloadly instructions](https://sideloadly.io/), [Sideloadly FAQ](https://sideloadly.io/faq), [Apple Personal Team limits](https://developer.apple.com/help/account/basics/about-your-developer-account).
+Not yet verified: signing, installation, launch on device, and data retention after re-signing.
+This trial establishes nothing about Gmail, university mail, Quercus, or on-device model quality.
+
+References: [AltStore FAQ](https://faq.altstore.io/), [direct sideloading announcement](https://x.com/altstoreio/status/1521570699361472512), [Apple Personal Team limits](https://developer.apple.com/help/account/basics/about-your-developer-account).
