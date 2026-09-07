@@ -150,6 +150,32 @@ final class EditionBuilderTests: XCTestCase {
         XCTAssertTrue(notice!.contains("yesterday"), "a vague warning teaches the reader to ignore it")
     }
 
+    func testNoticeUsesTheEditionsClockNotTheSystemClock() {
+        // Regression: the notice once called isDateInYesterday, which silently compares
+        // against the real system date and ignored the clock it was handed.
+        func notice(daysAgo: Double) -> String {
+            SourceStatus(
+                kind: .personalMail,
+                outcome: .failed(reason: "offline"),
+                lastSuccessAt: now.addingTimeInterval(-daysAgo * 86_400),
+                checkedAt: now
+            ).notice(relativeTo: now)!
+        }
+        XCTAssertTrue(notice(daysAgo: 0).contains("today"))
+        XCTAssertTrue(notice(daysAgo: 1).contains("yesterday"))
+        let older = notice(daysAgo: 5)
+        XCTAssertFalse(older.contains("today"))
+        XCTAssertFalse(older.contains("yesterday"))
+    }
+
+    func testNoticeWithoutAnySuccessSaysSo() {
+        let status = SourceStatus(
+            kind: .quercus, outcome: .failed(reason: "bad token"),
+            lastSuccessAt: nil, checkedAt: now
+        )
+        XCTAssertTrue(status.notice(relativeTo: now)!.contains("never synced"))
+    }
+
     func testHealthySourceProducesNoNotice() {
         let status = SourceStatus(kind: .quercus, outcome: .ok, lastSuccessAt: now, checkedAt: now)
         XCTAssertNil(status.notice(relativeTo: now))

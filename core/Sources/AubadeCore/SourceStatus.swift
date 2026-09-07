@@ -43,16 +43,28 @@ public struct SourceStatus: Codable, Sendable, Equatable, Identifiable {
         }
         let formatter = DateFormatter()
         formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
         formatter.timeStyle = .short
-        if calendar.isDateInToday(lastSuccessAt) {
+
+        // Deliberately measured against the edition's own clock rather than the system
+        // date: an edition rebuilt or re-read later must still describe the gap the way
+        // it stood when it was built.
+        let daysAgo = calendar.dateComponents(
+            [.day],
+            from: calendar.startOfDay(for: lastSuccessAt),
+            to: calendar.startOfDay(for: now)
+        ).day ?? 0
+
+        switch daysAgo {
+        case 0:
             formatter.dateStyle = .none
             return "\(kind.displayName) unavailable - last checked today at \(formatter.string(from: lastSuccessAt))"
-        }
-        if calendar.isDateInYesterday(lastSuccessAt) {
+        case 1:
             formatter.dateStyle = .none
             return "\(kind.displayName) unavailable - last checked yesterday at \(formatter.string(from: lastSuccessAt))"
+        default:
+            formatter.dateStyle = .medium
+            return "\(kind.displayName) unavailable - last checked \(formatter.string(from: lastSuccessAt))"
         }
-        formatter.dateStyle = .medium
-        return "\(kind.displayName) unavailable - last checked \(formatter.string(from: lastSuccessAt))"
     }
 }
