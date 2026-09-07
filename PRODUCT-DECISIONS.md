@@ -85,6 +85,19 @@ Verified reachable (probed, not assumed):
 - NYT Top Stories - free developer key required.
 - The Varsity (UofT student paper) - 200, no key. A student-specific option.
 
+AP is wanted as a top source, and the honest position is that AP does not offer one
+directly. Their robots.txt disallows `/*.rss` and `/api/v2/feed/` outright, and separately
+blocks CCBot, GPTBot, anthropic-ai and ClaudeBot from the whole site. Their developer API is
+a commercial licence, not something a personal app can obtain. Third-party "AP RSS
+generators" are scrapers of a site whose robots.txt forbids exactly that, so they are out.
+
+The workable route is Google News RSS, which is a public product of a licensed aggregator:
+querying it and filtering client-side to items whose `<source>` is `AP News` yields AP
+headlines that link back to apnews.com, which is where AP wants readers to land. A probe
+returned 14 items, though Google's `source:` operator is loose enough to mix in other
+outlets, so the client-side filter is required rather than optional. Treat this as the best
+available route rather than a supported interface: it is undocumented and could change.
+
 Because news is public content, it may be processed off-device, unlike email and
 coursework. This is the one part of the pipeline not bound by the on-device rule.
 
