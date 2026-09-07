@@ -59,6 +59,35 @@ OAuth integrations into one. The cost is that school mail is then read through G
 the university warns that forwarding can delay mail - keeping a copy in UTmail+ means
 nothing is lost, but the edition must still show school mail as a distinct source.
 
+## News sourcing
+
+Apple News+ cannot be a source. The Apple News API is a publishing interface for
+publishers pushing Apple News Format articles to their own channel; there is no read API,
+no way to fetch News+ content, and no way to enumerate what a subscriber can see. A shared
+family subscription does not change this. Apple News stays a separate reading destination.
+
+Licensed library databases are not a source either. UofT provides Factiva, ProQuest
+Canadian Newsstand, CBCA and similar through library.utoronto.ca, but these sit behind
+Shibboleth/EZproxy and their licences prohibit systematic or automated downloading.
+Harvesting them from a personal app would breach the licence and put the user's library
+account at risk. They are for the user to read, not for the app to collect.
+
+The resulting shape: the edition surfaces and links; the user's own subscriptions do the
+reading. Headlines and abstracts come from free, public, key-based APIs and RSS, and the
+link opens wherever the user actually has access - Apple News, a library database, or the
+open web. This keeps the app inside every licence while still being useful to someone with
+generous subscriptions.
+
+Verified reachable (probed, not assumed):
+- CBC top stories RSS - 200, no key. Canadian slot.
+- Globe and Mail category RSS - 200, no key.
+- Guardian Open Platform - live results, free developer key, rich metadata. World slot.
+- NYT Top Stories - free developer key required.
+- The Varsity (UofT student paper) - 200, no key. A student-specific option.
+
+Because news is public content, it may be processed off-device, unlike email and
+coursework. This is the one part of the pipeline not bound by the on-device rule.
+
 ## Interface
 
 The UI is to be designed in Penpot before it is built in SwiftUI. Screens are drawn and
