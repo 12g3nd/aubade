@@ -92,11 +92,18 @@ a commercial licence, not something a personal app can obtain. Third-party "AP R
 generators" are scrapers of a site whose robots.txt forbids exactly that, so they are out.
 
 The workable route is Google News RSS, which is a public product of a licensed aggregator:
-querying it and filtering client-side to items whose `<source>` is `AP News` yields AP
-headlines that link back to apnews.com, which is where AP wants readers to land. A probe
-returned 14 items, though Google's `source:` operator is loose enough to mix in other
-outlets, so the client-side filter is required rather than optional. Treat this as the best
-available route rather than a supported interface: it is undocumented and could change.
+querying it yields AP headlines that link back to apnews.com, which is where AP wants
+readers to land.
+
+The query matters. Probed live, `source:Associated Press` returned only 2 AP items out of
+13, the rest being 1News, WWNY and the New York Times. `site:apnews.com` returned 100 out
+of 100. The site operator is the default; the client-side source filter is kept as a guard
+against that behaviour changing rather than as the mechanism.
+
+Two known warts. Links arrive as `news.google.com/rss/articles/...` redirects rather than
+direct AP URLs, so the reader reaches AP with one extra hop. And this is an undocumented
+interface that could change without notice - if it does, the AP slot degrades to empty
+rather than breaking the edition, because a failed feed is skipped.
 
 Because news is public content, it may be processed off-device, unlike email and
 coursework. This is the one part of the pipeline not bound by the on-device rule.

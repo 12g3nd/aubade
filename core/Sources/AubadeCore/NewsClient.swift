@@ -22,8 +22,15 @@ public struct FeedDefinition: Sendable, Equatable {
 public extension FeedDefinition {
     /// Keyless feeds only, so news needs no secrets and nothing to rotate.
     static let defaults: [FeedDefinition] = [
+        // `site:apnews.com` rather than `source:Associated Press`: probed live, the source
+        // operator returned 2 AP items out of 13 (the rest were 1News, WWNY and the NYT),
+        // while the site operator returned 100 out of 100. The requiredSource filter below
+        // is kept as a guard in case that behaviour changes, not as the main mechanism.
+        //
+        // Links come back as news.google.com/rss/articles/... redirects rather than direct
+        // apnews.com URLs. They still land the reader on AP, with one extra hop.
         FeedDefinition(
-            url: URL(string: "https://news.google.com/rss/search?q=when:24h%20source:Associated%20Press&hl=en-CA&gl=CA&ceid=CA:en")!,
+            url: URL(string: "https://news.google.com/rss/search?q=site:apnews.com%20when:24h&hl=en-CA&gl=CA&ceid=CA:en")!,
             publisher: "AP News",
             beat: .world,
             requiredSource: "AP News"
