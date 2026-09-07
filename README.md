@@ -1,19 +1,56 @@
 # Aubade
 
-Aubade is a finite, personal morning edition for iPhone: obligations first, then a small edit of the world and something curious to enjoy. Private analysis is intended to stay on the device.
+A finite, personal morning edition for iPhone: obligations first, then a small edit of the
+world and something curious to enjoy. Private analysis stays on the device.
 
-This repository currently contains the native installation trial. It deliberately has no email, Quercus, news, analytics, credentials, or third-party dependencies. The trial proves the cheapest development loop before we build the actual edition.
+## Layout
 
-## Build the iPhone trial from Windows
+- `core/` — `AubadeCore`, a Swift package holding all the logic: obligations, sources, the
+  edition pipeline, news, the cultural slot, and storage. Built and tested on a hosted
+  macOS runner, so it can be developed from Windows without a Mac.
+- `native-trial/` — a minimal SwiftUI app used to prove the build-and-install loop. Not the
+  product.
+- `PRODUCT-DECISIONS.md` — the agreed design, and what has actually been verified rather
+  than assumed.
 
-The repository includes a GitHub Actions workflow that builds on a hosted macOS runner. Run it manually from the **Actions** tab, or push a change under `native-trial/`. Download the `AubadeTrial-unsigned-ipa` artifact from the completed run, then sign and install it with AltServer on Windows (hold Shift and click the AltServer tray icon to reveal "Sideload .ipa…").
+## Rules the code enforces
 
-GitHub Actions does not receive your accounts or phone data. The workflow only compiles the checked-in source. Keep this repository code-only; never commit OAuth tokens, email exports, provisioning profiles, certificates, or screenshots containing personal data.
+These are decisions, not implementation details, so they are held in place by tests:
 
-## Install and test
+- Deadlines come only from source data. An undated item is never guessed into urgency.
+- Stated facts and inferred guesses are kept apart. A guess is shown as a candidate to
+  check, never asserted as an obligation.
+- Reading is not handling. State changes only on an explicit action, and survives the next
+  fetch, because a source has no idea you dealt with something.
+- Compression may defer non-urgent work, but never anything overdue or due within 48 hours.
+- **An edition may only say you are caught up when every source actually answered.** Finding
+  nothing is not the same as there being nothing, so a failed sync produces a named notice
+  rather than false reassurance.
+- Exports default to public sections only, assembled as a whitelist rather than filtered,
+  so an obligation cannot leak into a file that leaves the phone.
+- Stored mornings expire after 30 days. Explicitly saved items are public by type and
+  outlive that window.
 
-Follow [native-trial/README.md](native-trial/README.md). The current trial checks offline launch, local storage, export, and persistence after re-signing. Free Apple-account signing expires after seven days, so the app must be re-signed from your Windows laptop. See the trial README for why this route is a poor long-term fit.
+## Working on it
 
-## Product direction
+```bash
+cd core && swift test
+```
 
-The agreed product decisions are recorded in [PRODUCT-DECISIONS.md](PRODUCT-DECISIONS.md). They are a design record, not a promise that every integration has been proven.
+Without a Mac, push instead: the **Core tests** workflow runs the same suite on a macOS
+runner in about a minute. That is the development loop this project is built around.
+
+The **Build iOS trial IPA** workflow produces an unsigned `.ipa` for the install trial.
+
+## Status
+
+Core logic for v1 is complete and tested. Not yet done: the SwiftUI interface, which is
+waiting on Penpot designs, and the mail clients, which are waiting on the school-email
+consent question in `PRODUCT-DECISIONS.md`.
+
+Installation is currently blocked upstream: AltServer cannot authenticate with Apple
+([altstoreio/AltStore#1781](https://github.com/altstoreio/AltStore/issues/1781)). Nothing
+in this repository can fix that; the alternatives are recorded in the decisions file.
+
+Keep this repository code-only. Never commit OAuth tokens, email exports, provisioning
+profiles, certificates, device identifiers, or screenshots containing personal data.
