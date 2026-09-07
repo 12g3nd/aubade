@@ -29,6 +29,36 @@
 - Exports offer full edition or public sections only, with public sections initially selected. No credentials or raw email exports.
 - Keep fetched private content only as needed for processing and active reminders; preserve explicitly saved items.
 
+## Source access findings
+
+Quercus: settled. `q.utoronto.ca/api/v1/` is a live Canvas REST API answering
+`WWW-Authenticate: Bearer realm="canvas-lms"`. A personal access token generated at
+Account > Settings gives read access; `/api/v1/planner/items` returns assignments and
+deadlines across all courses in one call. No university approval needed. This is the same
+route StudyCadenza uses.
+
+Personal Gmail: accessible. Thunderbird already authenticates against `imap.gmail.com`
+with OAuth2. Prefer the Gmail REST API over IMAP so no C++ IMAP library is needed on iOS.
+Note the trap: an OAuth app left in "Testing" publishing status has refresh tokens that
+expire every seven days. Set the project to production and accept the unverified-app
+warning, which is fine under 100 users.
+
+School email: at risk. IMAP itself is open - Thunderbird connects to
+`outlook.office365.com:993` with OAuth2 and Exchange answers - so the protocol is not
+blocked. The tenant is `78aac226-2f03-4b4d-9037-b46d56c55210`, federated to UofT's own
+ADFS at `sts.ad.utoronto.ca`. The risk is consent, not protocol: UofT runs a formal review
+for third-party apps integrating with University Microsoft 365 accounts, including an
+Application Review Committee and risk assessment, and the request route is documented for
+staff and faculty rather than students. A personal hobby app is unlikely to pass. Thunderbird
+works because Mozilla is a verified publisher, which tells us nothing about an unverified app.
+
+Planned fallback if consent is refused: forward UTmail+ to Gmail with "keep a copy"
+enabled, and label the forwarded mail with a Gmail filter so the edition can still say
+which obligations came from school. This needs no university approval and collapses two
+OAuth integrations into one. The cost is that school mail is then read through Google, and
+the university warns that forwarding can delay mail - keeping a copy in UTmail+ means
+nothing is lost, but the edition must still show school mail as a distinct source.
+
 ## Interface
 
 The UI is to be designed in Penpot before it is built in SwiftUI. Screens are drawn and
