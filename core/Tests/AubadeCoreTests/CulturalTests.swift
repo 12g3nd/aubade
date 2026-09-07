@@ -10,8 +10,16 @@ final class CulturalDeskTests: XCTestCase {
 
     let desk = CulturalDesk()
 
+    /// 7am local on consecutive days. Built from components rather than by adding seconds
+    /// to an epoch: the selection turns over at local midnight, so a fixture that happens
+    /// to land in the late afternoon makes "later the same day" cross into tomorrow.
     func day(_ offset: Int) -> Date {
-        Date(timeIntervalSince1970: 1_780_000_000).addingTimeInterval(Double(offset) * 86_400)
+        var components = DateComponents()
+        components.year = 2026
+        components.month = 9
+        components.day = 7 + offset
+        components.hour = 7
+        return calendar.date(from: components)!
     }
 
     // MARK: - The property the whole design rests on
@@ -19,14 +27,25 @@ final class CulturalDeskTests: XCTestCase {
     func testSelectionIsStableWithinTheSameDay() {
         // The edition is prepared when the app opens. Reopening it at lunch must show the
         // same morning rather than rerolling the poem.
-        let morning = day(0)
-        let evening = morning.addingTimeInterval(11 * 3600)
+        let morning = day(0)                                  // 07:00 local
+        let afternoon = morning.addingTimeInterval(10 * 3600) // 17:00, same local day
 
         let a = desk.selection(for: morning, calendar: calendar)
-        let b = desk.selection(for: evening, calendar: calendar)
+        let b = desk.selection(for: afternoon, calendar: calendar)
 
         XCTAssertEqual(a.item?.id, b.item?.id)
         XCTAssertEqual(a.curiosity?.id, b.curiosity?.id)
+    }
+
+    func testSelectionTurnsOverAtLocalMidnightNotAtAFixedOffset() {
+        let lateTonight = day(0).addingTimeInterval(16 * 3600)  // 23:00 local
+        let earlyTomorrow = day(0).addingTimeInterval(18 * 3600) // 01:00 local, next day
+
+        XCTAssertNotEqual(
+            desk.selection(for: lateTonight, calendar: calendar).item?.id,
+            desk.selection(for: earlyTomorrow, calendar: calendar).item?.id,
+            "a new day should bring a new selection, and midnight is where it changes"
+        )
     }
 
     func testSelectionChangesFromOneDayToTheNext() {
