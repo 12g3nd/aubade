@@ -29,6 +29,16 @@
 - Exports offer full edition or public sections only, with public sections initially selected. No credentials or raw email exports.
 - Keep fetched private content only as needed for processing and active reminders; preserve explicitly saved items.
 
+## Interface
+
+The UI is to be designed in Penpot before it is built in SwiftUI. Screens are drawn and
+agreed there rather than being discovered in code, so the SwiftUI layer stays a
+transcription of an approved design instead of an accumulation of ad-hoc views.
+
+This matters more than usual here: the app cannot currently be installed on the phone, so
+there is no way to judge feel by holding it. Penpot is the only place the visual design can
+be settled until installation is unblocked. Keep SwiftUI views thin until then.
+
 ## Current feasibility gate
 
 The friend's Mac is no longer available, and Sideloadly failed to launch on Windows and was removed. The build now runs on a GitHub Actions macOS runner at no cost, and signing/installing is done by AltServer on Windows with a free Apple account. The next authorized step is a minimal native installation trial, not the full product.
