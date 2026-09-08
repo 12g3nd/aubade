@@ -43,17 +43,29 @@ public struct Edition: Codable, Sendable, Equatable {
     /// Whether the edition is entitled to tell the reader they are caught up.
     ///
     /// This is the load-bearing rule of the whole app. An empty list means "we found
-    /// nothing", which is only the same as "there is nothing" when every source
-    /// actually answered. If any source failed, the edition must stay silent about
-    /// completeness rather than reassure the reader falsely.
+    /// nothing", which is only the same as "there is nothing" when every source actually
+    /// answered. If any source failed, the edition must stay silent about completeness
+    /// rather than reassure the reader falsely.
+    ///
+    /// The `!sources.isEmpty` clause matters more than it looks: before any account is
+    /// connected there are no sources and therefore no failures, and without it a fresh
+    /// install would greet the reader with "nothing needs you this morning" having asked
+    /// nothing at all.
     public var canClaimComplete: Bool {
-        allObligations.isEmpty && candidates.isEmpty && deferred.isEmpty && failedSources.isEmpty
+        !sources.isEmpty
+            && failedSources.isEmpty
+            && allObligations.isEmpty
+            && candidates.isEmpty
+            && deferred.isEmpty
     }
 
     /// The honest headline for the top of the edition.
     public var summaryLine: String {
         if canClaimComplete { return "Nothing needs you this morning." }
         let count = allObligations.count
+        if count == 0 && sources.isEmpty {
+            return "No accounts connected yet."
+        }
         if count == 0 && !failedSources.isEmpty {
             return "Nothing found in the sources that answered."
         }

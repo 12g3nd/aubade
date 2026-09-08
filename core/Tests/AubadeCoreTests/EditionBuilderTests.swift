@@ -181,3 +181,18 @@ final class EditionBuilderTests: XCTestCase {
         XCTAssertNil(status.notice(relativeTo: now))
     }
 }
+
+extension EditionBuilderTests {
+    /// Before any account is connected there are no sources and so no failures, which
+    /// would otherwise satisfy every other clause of `canClaimComplete`.
+    func testAFreshInstallDoesNotClaimYouAreCaughtUp() {
+        let built = EditionBuilder().build(obligations: [], sources: [], now: now)
+        XCTAssertFalse(built.canClaimComplete, "an edition that asked nothing cannot report nothing")
+        XCTAssertEqual(built.summaryLine, "No accounts connected yet.")
+    }
+
+    func testOneHealthySourceIsEnoughToVouchForAnEmptyMorning() {
+        let ok = SourceStatus(kind: .quercus, outcome: .ok, lastSuccessAt: now, checkedAt: now)
+        XCTAssertTrue(EditionBuilder().build(obligations: [], sources: [ok], now: now).canClaimComplete)
+    }
+}

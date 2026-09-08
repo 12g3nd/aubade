@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "core/**"
+      - "app/**"
       - ".github/workflows/core-tests.yml"
   pull_request:
     paths:
@@ -41,3 +42,13 @@ jobs:
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO \
             | tail -40
+
+  app-build:
+    # The whole thing: app target, local package, fonts and all.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Aubade app for iOS
+        run: |
+          set -o pipefail
+          xcodebuild build             -project app/Aubade.xcodeproj             -scheme Aubade             -destination 'generic/platform=iOS'             -skipPackagePluginValidation             CODE_SIGNING_ALLOWED=NO             | tail -40
