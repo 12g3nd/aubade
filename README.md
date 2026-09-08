@@ -43,9 +43,14 @@ Run it from the Actions tab and download the `Aubade-unsigned-ipa` artifact.
 
 ## Status
 
-Core logic for v1 is complete and tested. Not yet done: the SwiftUI interface, which is
-waiting on Penpot designs, and the mail clients, which are waiting on the school-email
-consent question in `PRODUCT-DECISIONS.md`.
+v1 is built: core logic, the Broadsheet interface, bundled typography, storage, and an app
+that compiles, links and packages for the phone. Not yet done: the mail clients, deferred
+until the school-email consent question in `PRODUCT-DECISIONS.md` is settled, and the
+export and archive screens, whose logic exists and is tested but has no interface yet.
+
+Nothing here has run on a device. The app builds and its product is verified, but how
+newsprint reads on an OLED screen at seven in the morning is not something a hosted runner
+can answer.
 
 Installation is currently blocked upstream: AltServer cannot authenticate with Apple
 ([altstoreio/AltStore#1781](https://github.com/altstoreio/AltStore/issues/1781)). Nothing
