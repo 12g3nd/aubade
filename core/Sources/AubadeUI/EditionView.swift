@@ -8,6 +8,7 @@ import AubadeCore
 public struct EditionView: View {
     private let presentation: EditionPresentation
     private let onAction: (String, ObligationAction) -> Void
+    private let onOpenSettings: (() -> Void)?
 
     /// Items handled during this session.
     ///
@@ -20,10 +21,12 @@ public struct EditionView: View {
 
     public init(
         presentation: EditionPresentation,
-        onAction: @escaping (String, ObligationAction) -> Void = { _, _ in }
+        onAction: @escaping (String, ObligationAction) -> Void = { _, _ in },
+        onOpenSettings: (() -> Void)? = nil
     ) {
         self.presentation = presentation
         self.onAction = onAction
+        self.onOpenSettings = onOpenSettings
     }
 
     private var edition: Edition { presentation.morning.edition }
@@ -154,6 +157,13 @@ public struct EditionView: View {
                 .foregroundStyle(theme.doubtColor)
                 .padding(.top, 7)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+
+        // The imprint, where a paper prints who made it. Settings live here because the
+        // edition ends - reaching the colophon means you are finished reading, which is
+        // exactly when housekeeping is welcome and never before.
+        if let onOpenSettings {
+            Colophon(presentation: presentation, openSettings: onOpenSettings)
         }
     }
 

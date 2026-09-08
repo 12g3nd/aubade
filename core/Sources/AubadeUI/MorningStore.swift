@@ -135,6 +135,15 @@ public final class MorningStore: ObservableObject {
         await prepareTodaysEdition()
     }
 
+    /// Removes the token and stops checking Quercus.
+    ///
+    /// Stored mornings are left alone: they are already written, and silently deleting a
+    /// month of editions is not what "disconnect" means. The archive expires on its own.
+    public func disconnectQuercus() async {
+        try? credentials.setToken(nil, for: .quercus)
+        state = .needsSetup
+    }
+
     public var hasQuercusToken: Bool {
         ((try? credentials.token(for: .quercus)) ?? nil)?.isEmpty == false
     }

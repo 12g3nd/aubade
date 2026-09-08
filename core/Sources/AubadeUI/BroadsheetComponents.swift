@@ -445,3 +445,40 @@ struct FlowLayout: Layout {
         }
     }
 }
+
+
+// MARK: - Colophon
+
+/// The imprint line that closes the edition.
+struct Colophon: View {
+    let presentation: EditionPresentation
+    let openSettings: () -> Void
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        VStack(spacing: 9) {
+            Rectangle()
+                .frame(height: 1)
+                .foregroundStyle(theme.palette.rule)
+
+            HStack(spacing: 6) {
+                Text("Aubade · \(presentation.folioIssue)".uppercased())
+                    .font(theme.type.folio)
+                    .tracking(1.1)
+                    .foregroundStyle(theme.palette.inkMuted)
+                Spacer(minLength: 8)
+                Button(action: openSettings) {
+                    Text("Settings".uppercased())
+                        .font(theme.type.folioEmphasis)
+                        .tracking(1.1)
+                        .foregroundStyle(theme.palette.spot)
+                        .padding(.vertical, 6)
+                        .padding(.leading, 10)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Settings")
+            }
+        }
+        .padding(.top, 18)
+    }
+}
