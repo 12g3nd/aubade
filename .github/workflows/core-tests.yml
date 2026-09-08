@@ -26,3 +26,18 @@ jobs:
       - name: Test
         working-directory: core
         run: swift test
+
+  ios-build:
+    # The views only ever run on iOS, so compiling for the host is not enough proof.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build AubadeUI for iOS
+        working-directory: core
+        run: |
+          xcodebuild build \
+            -scheme AubadeUI \
+            -destination 'generic/platform=iOS' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            | tail -40
