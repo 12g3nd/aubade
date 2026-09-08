@@ -120,11 +120,20 @@ final class EditionPresentationTests: XCTestCase {
 
     func testAllClearLineNamesTheSourcesThatAnswered() {
         let p = present(sources: [okQuercus, SourceStatus(kind: .personalMail, outcome: .ok, lastSuccessAt: day(0), checkedAt: day(0))])
-        let line = p.allClearLine!
-        XCTAssertTrue(line.contains("quercus"))
-        XCTAssertTrue(line.contains("personal email"))
-        XCTAssertTrue(line.hasSuffix("all answered."))
-        XCTAssertEqual(line.first, "P", "the line should read as a sentence")
+        // Quercus keeps its capital as a proper noun; the mail accounts are descriptions.
+        XCTAssertEqual(p.allClearLine, "Quercus and personal email all answered.")
+    }
+
+    func testAllClearLineReadsAsASentenceForOneAndThreeSources() {
+        let one = present(sources: [okQuercus])
+        XCTAssertEqual(one.allClearLine, "Quercus answered.")
+
+        let all = present(sources: [
+            okQuercus,
+            SourceStatus(kind: .personalMail, outcome: .ok, lastSuccessAt: day(0), checkedAt: day(0)),
+            SourceStatus(kind: .schoolMail, outcome: .ok, lastSuccessAt: day(0), checkedAt: day(0))
+        ])
+        XCTAssertEqual(all.allClearLine, "Quercus, personal email and school email all answered.")
     }
 
     func testNoAllClearLineWhenTheDayIsNotClear() {

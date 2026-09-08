@@ -95,9 +95,19 @@ public struct EditionPresentation: Sendable {
     /// The all-clear line, shown only on a morning entitled to one.
     public var allClearLine: String? {
         guard edition.canClaimComplete else { return nil }
-        let named = edition.sources.map { $0.kind.displayName.lowercased() }.sorted()
-        guard !named.isEmpty else { return "Nothing needs you this morning." }
-        return "\(named.joined(separator: ", ").sentenceCased) all answered."
+        // Declaration order, so the sentence reads the same way every morning.
+        let named = SourceKind.allCases
+            .filter { kind in edition.sources.contains { $0.kind == kind } }
+            .map(\.inlineName)
+
+        switch named.count {
+        case 0: return "Nothing needs you this morning."
+        case 1: return "\(named[0].sentenceCased) answered."
+        default:
+            let last = named[named.count - 1]
+            let rest = named.dropLast().joined(separator: ", ")
+            return "\(rest.sentenceCased) and \(last) all answered."
+        }
     }
 
     /// Notices for every source that failed, each naming the source and when it last worked.

@@ -7,11 +7,23 @@ public enum SourceKind: String, Codable, Sendable, CaseIterable {
     case personalMail
     case schoolMail
 
+    /// For headings and notices, where the name starts the line.
     public var displayName: String {
         switch self {
         case .quercus: return "Quercus"
         case .personalMail: return "Personal email"
         case .schoolMail: return "School email"
+        }
+    }
+
+    /// For running text. Quercus is a proper noun and keeps its capital; the mail accounts
+    /// are descriptions and do not, so a sentence listing them reads as English rather than
+    /// as a list of labels.
+    public var inlineName: String {
+        switch self {
+        case .quercus: return "Quercus"
+        case .personalMail: return "personal email"
+        case .schoolMail: return "school email"
         }
     }
 }
