@@ -51,4 +51,28 @@ jobs:
       - name: Build the Aubade app for iOS
         run: |
           set -o pipefail
-          xcodebuild build             -project app/Aubade.xcodeproj             -scheme Aubade             -destination 'generic/platform=iOS'             -skipPackagePluginValidation             CODE_SIGNING_ALLOWED=NO             | tail -40
+          xcodebuild build             -project app/Aubade.xcodeproj             -scheme Aubade             -destination 'generic/platform=iOS'             -derivedDataPath build             -skipPackagePluginValidation             CODE_SIGNING_ALLOWED=NO             | tail -40
+
+      - name: Check the product actually contains what it should
+        # A build that succeeds is not proof the app has an icon or its fonts: both are
+        # resources that can be silently omitted while the compile stays green.
+        run: |
+          set -euo pipefail
+          APP=$(find build/Build/Products -maxdepth 2 -name 'Aubade.app' -type d | head -1)
+          test -n "$APP" || { echo "no Aubade.app was produced"; exit 1; }
+          echo "product: $APP"
+
+          test -f "$APP/Assets.car" || { echo "MISSING: compiled asset catalog (no app icon)"; exit 1; }
+          echo "asset catalog present"
+
+          if ! grep -qa "AppIcon" "$APP/Assets.car"; then
+            echo "MISSING: AppIcon is not in the asset catalog"; exit 1
+          fi
+          echo "AppIcon present"
+
+          FONTS=$(find "$APP" -name '*.ttf' | wc -l | tr -d ' ')
+          test "$FONTS" -ge 4 || { echo "MISSING: only $FONTS fonts bundled, expected 4"; exit 1; }
+          echo "$FONTS fonts bundled"
+
+          test -x "$APP/Aubade" || { echo "MISSING: executable"; exit 1; }
+          echo "executable present"
