@@ -52,10 +52,14 @@ public struct Palette: Sendable {
 /// design. `AubadeFonts.missing` exists to make that failure speak up, and a test asserts
 /// every name below actually resolves from the bundled files.
 public enum FontFamily {
-    public static let editorialRegular = "NewsreaderRoman-Regular"
+    // Regular and Italic are the two files' own default instances, so Core Text exposes
+    // them under the file PostScript name rather than the fvar named-instance name. The
+    // heavier weights are genuine named instances and use those names. Verified by test,
+    // not by reasoning - the first four guesses here were all wrong.
+    public static let editorialRegular = "Newsreader16pt-Regular"
+    public static let editorialItalic = "Newsreader16pt-Italic"
     public static let editorialSemibold = "NewsreaderRoman-SemiBold"
     public static let editorialBold = "NewsreaderRoman-Bold"
-    public static let editorialItalic = "NewsreaderItalic-Regular"
     public static let utility = "IBMPlexMono-Regular"
     public static let utilityMedium = "IBMPlexMono-Medium"
 
