@@ -192,7 +192,11 @@ struct LeadStory: View {
 
 // MARK: - Briefs
 
-enum ObligationAction { case handled, snooze, didNotNeedAction }
+public enum ObligationAction: Sendable {
+    case handled
+    case snooze
+    case didNotNeedAction
+}
 
 /// One line in the brief list.
 ///
