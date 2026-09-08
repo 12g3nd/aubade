@@ -8,8 +8,6 @@ world and something curious to enjoy. Private analysis stays on the device.
 - `core/` — `AubadeCore`, a Swift package holding all the logic: obligations, sources, the
   edition pipeline, news, the cultural slot, and storage. Built and tested on a hosted
   macOS runner, so it can be developed from Windows without a Mac.
-- `native-trial/` — a minimal SwiftUI app used to prove the build-and-install loop. Not the
-  product.
 - `PRODUCT-DECISIONS.md` — the agreed design, and what has actually been verified rather
   than assumed.
 
@@ -40,7 +38,8 @@ cd core && swift test
 Without a Mac, push instead: the **Core tests** workflow runs the same suite on a macOS
 runner in about a minute. That is the development loop this project is built around.
 
-The **Build iOS trial IPA** workflow produces an unsigned `.ipa` for the install trial.
+The **Build Aubade IPA** workflow packages an unsigned, installable `.ipa` of the real app.
+Run it from the Actions tab and download the `Aubade-unsigned-ipa` artifact.
 
 ## Status
 
