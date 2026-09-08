@@ -10,7 +10,12 @@ let package = Package(
     ],
     targets: [
         .target(name: "AubadeCore"),
-        .target(name: "AubadeUI", dependencies: ["AubadeCore"]),
-        .testTarget(name: "AubadeCoreTests", dependencies: ["AubadeCore"])
+        .target(
+            name: "AubadeUI",
+            dependencies: ["AubadeCore"],
+            resources: [.process("Resources")]
+        ),
+        .testTarget(name: "AubadeCoreTests", dependencies: ["AubadeCore"]),
+        .testTarget(name: "AubadeUITests", dependencies: ["AubadeUI"])
     ]
 )

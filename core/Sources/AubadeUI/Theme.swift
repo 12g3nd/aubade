@@ -43,14 +43,19 @@ public struct Palette: Sendable {
     )
 }
 
-/// Font families the edition expects. If the files are not bundled, SwiftUI falls back to
-/// the system face silently, which is survivable but not the design - `Theme.fontsAreLoaded`
-/// exists so the app can say so plainly rather than shipping a silent substitution.
+/// PostScript names of the bundled faces.
+///
+/// These are read from the files rather than guessed. Newsreader ships as a variable font
+/// whose named instances are `NewsreaderRoman-*` and `NewsreaderItalic-*` - not the
+/// `Newsreader-*` the family name suggests. A wrong name here is invisible: SwiftUI falls
+/// back to the system serif without complaint, so the app looks fine and simply is not the
+/// design. `AubadeFonts.missing` exists to make that failure speak up, and a test asserts
+/// every name below actually resolves from the bundled files.
 public enum FontFamily {
-    public static let editorialRegular = "Newsreader-Regular"
-    public static let editorialSemibold = "Newsreader-SemiBold"
-    public static let editorialBold = "Newsreader-Bold"
-    public static let editorialItalic = "Newsreader-Italic"
+    public static let editorialRegular = "NewsreaderRoman-Regular"
+    public static let editorialSemibold = "NewsreaderRoman-SemiBold"
+    public static let editorialBold = "NewsreaderRoman-Bold"
+    public static let editorialItalic = "NewsreaderItalic-Regular"
     public static let utility = "IBMPlexMono-Regular"
     public static let utilityMedium = "IBMPlexMono-Medium"
 
